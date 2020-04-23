@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This script will check that pre-requistes exist to ensure that
+# This script will check that pre-requisites exist to ensure that
 # Anthos Sample Deployment will be successfully deployed.
 #
 # Example usage:
