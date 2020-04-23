@@ -58,7 +58,7 @@ function parse_flags() {
 
   if [[ -z "$NETWORK" ]]; then
     echo
-    echo "Please use the --network flag to specific the network that Anthos Sample Deployment will use."
+    echo "Please use the --network flag to specify the network that Anthos Sample Deployment will use."
     echo
     exit 1
   fi
