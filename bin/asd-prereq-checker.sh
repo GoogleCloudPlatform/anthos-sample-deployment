@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# This script will check that pre-requisites exist to ensure that
+# This script will check that prerequisites exist to ensure that
 # Anthos Sample Deployment will be successfully deployed.
 #
 # Example usage:
-# ./asd-pre-req-checker.sh --network foo_network
+# ./asd-prereq-checker.sh --network foo_network
 
 NETWORK=""
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
