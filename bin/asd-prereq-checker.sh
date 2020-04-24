@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# This script will check that prerequisites exist to ensure that
-# Anthos Sample Deployment will be successfully deployed.
+# This script checks that prerequisites exist to ensure that
+# the Anthos Sample Deployment is successfully deployed.
 #
 # Example usage:
 # ./asd-prereq-checker.sh --network foo_network
