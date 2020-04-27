@@ -64,6 +64,21 @@ function parse_flags() {
   fi
 }
 
+function check_iam_policy {
+  # iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy are the
+  # 2 permissions that need to be in place.  Sufficient to check them by
+  # IAM roles.
+  # the list default is unlimited, no paging
+  result=$(gcloud iam roles list --format=json | grep "name")
+  if [[ "$result" == *"roles/owner"* || "$result" == *"roles/editor"* || "$result" == *"roles/iam.serviceAccountAdmin"* ]]; then
+    echo "PASS: User has permission to create service account with the required IAM policies."
+  else
+    echo
+    echo "WARNING: Unable to verify if you have the necessary permission to create a service account with the required IAM policy. Please verify manually that you have iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy permissions, and then proceed with deployment.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID  You can also disregard this warning, if you will be providing your own pre-existing service account."
+    echo
+  fi
+}
+
 function check_service_management_api_is_enabled {
   # Getting json output removes an output of `Listed 0 items` that
   # goes to the terminal.
@@ -131,6 +146,7 @@ function check_internet_gateway_exists {
 }
 
 parse_flags "$@"
+check_iam_policy
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
