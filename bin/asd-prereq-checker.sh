@@ -11,11 +11,6 @@ SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 
 PROJECT_ID=$(gcloud config get-value project)
 
-UNABLE_TOUSER_DOES_NOT_HAVE="{
-  'KnownIssueId': 'invalid_iam',
-  'Message': 'User needs to have IAM Owner role for this project $PROJECT_ID.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID '
-}"
-
 DISABLED_SERVICE_MANAGEMENT_API="{
   'KnownIssueId': 'disabled_service_management_api',
   'Message': 'Service Management API is not enabled. You must enable this API in the current project. https://console.cloud.google.com/apis/api/servicemanagement.googleapis.com/overview?project=$PROJECT_ID '
