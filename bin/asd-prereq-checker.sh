@@ -64,13 +64,13 @@ function parse_flags() {
   fi
 }
 
-function check_user_is_project_owner {
+function check_iam_policy {
   # iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy are the
   # 2 permissions that need to be in place.  Sufficient to check them by
   # IAM roles.
   # the list default is unlimited, no paging
   result=$(gcloud iam roles list --format=json | grep "name")
-  if [[ "$result" == *"roles/owner22222"* || "$result" == *"roles/editor22222"* ]]; then
+  if [[ "$result" == *"roles/owner"* || "$result" == *"roles/editor"* ]]; then
     echo "PASS: User has permission to create service account with the needed IAM policies."
   else
     echo
@@ -146,7 +146,7 @@ function check_internet_gateway_exists {
 }
 
 parse_flags "$@"
-check_user_is_project_owner
+check_iam_policy
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
