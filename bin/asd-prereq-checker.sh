@@ -11,6 +11,11 @@ SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 
 PROJECT_ID=$(gcloud config get-value project)
 
+USER_IS_NOT_PROJECT_OWNER="{
+  'KnownIssueId': 'invalid_iam',
+  'Message': 'User needs have IAM Owner role for this project $PROJECT_ID.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID '
+}"
+
 DISABLED_SERVICE_MANAGEMENT_API="{
   'KnownIssueId': 'disabled_service_management_api',
   'Message': 'Service Management API is not enabled. You must enable this API in the current project. https://console.cloud.google.com/apis/api/servicemanagement.googleapis.com/overview?project=$PROJECT_ID '
@@ -61,6 +66,18 @@ function parse_flags() {
     echo "Please use the --network flag to specify the network that Anthos Sample Deployment will use."
     echo
     exit 1
+  fi
+}
+
+function check_user_is_project_owner {
+  result=$(gcloud iam roles list --format=json --filter=name:roles/owner)
+  if [[ "$result" != *"roles/owner"* ]]; then
+    echo
+    echo $USER_IS_NOT_PROJECT_OWNER
+    echo
+    exit 1
+  else
+    echo "PASS: User has project owner IAM role."
   fi
 }
 
@@ -131,6 +148,7 @@ function check_internet_gateway_exists {
 }
 
 parse_flags "$@"
+check_user_is_project_owner
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
