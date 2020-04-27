@@ -70,7 +70,7 @@ function check_iam_policy {
   # IAM roles.
   # the list default is unlimited, no paging
   result=$(gcloud iam roles list --format=json | grep "name")
-  if [[ "$result" == *"roles/owner"* || "$result" == *"roles/editor"* ]]; then
+  if [[ "$result" == *"roles/owner"* || "$result" == *"roles/editor"* || "$result" == *"roles/iam.serviceAccountAdmin"* ]]; then
     echo "PASS: User has permission to create service account with the required IAM policies."
   else
     echo
