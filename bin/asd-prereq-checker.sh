@@ -13,7 +13,7 @@ PROJECT_ID=$(gcloud config get-value project)
 
 USER_IS_NOT_PROJECT_OWNER="{
   'KnownIssueId': 'invalid_iam',
-  'Message': 'User needs have IAM Owner role for this project $PROJECT_ID.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID '
+  'Message': 'User needs to have IAM Owner role for this project $PROJECT_ID.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID '
 }"
 
 DISABLED_SERVICE_MANAGEMENT_API="{
