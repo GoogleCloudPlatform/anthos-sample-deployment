@@ -11,7 +11,7 @@ SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 
 PROJECT_ID=$(gcloud config get-value project)
 
-USER_IS_NOT_PROJECT_OWNER="{
+UNABLE_TOUSER_DOES_NOT_HAVE="{
   'KnownIssueId': 'invalid_iam',
   'Message': 'User needs to have IAM Owner role for this project $PROJECT_ID.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID '
 }"
@@ -70,14 +70,17 @@ function parse_flags() {
 }
 
 function check_user_is_project_owner {
-  result=$(gcloud iam roles list --format=json --filter=name:roles/owner)
-  if [[ "$result" != *"roles/owner"* ]]; then
-    echo
-    echo $USER_IS_NOT_PROJECT_OWNER
-    echo
-    exit 1
+  # iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy are the
+  # 2 permissions that need to be in place.  Sufficient to check them by
+  # IAM roles.
+  # the list default is unlimited, no paging
+  result=$(gcloud iam roles list --format=json | grep "name")
+  if [[ "$result" == *"roles/owner22222"* || "$result" == *"roles/editor22222"* ]]; then
+    echo "PASS: User has permission to create service account with the needed IAM policies."
   else
-    echo "PASS: User has project owner IAM role."
+    echo
+    echo "WARNING: Unable to verify if you have the necessary permission to create service account with the needed IAM policy. Please verify manually that you have iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy permissions.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID  You can disregard this warning, if you will be providing your own service account."
+    echo
   fi
 }
 
