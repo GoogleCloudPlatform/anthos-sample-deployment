@@ -74,7 +74,7 @@ function check_iam_policy {
     echo "PASS: User has permission to create service account with the needed IAM policies."
   else
     echo
-    echo "WARNING: Unable to verify if you have the necessary permission to create service account with the needed IAM policy. Please verify manually that you have iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy permissions.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID  You can also disregard this warning, if you will be providing your own service account."
+    echo "WARNING: Unable to verify if you have the necessary permission to create service account with the needed IAM policy. Please verify manually that you have iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy permissions, and then proceed with deployment.  https://console.cloud.google.com/iam-admin/iam?project=$PROJECT_ID  You can also disregard this warning, if you will be providing your own pre-existing service account."
     echo
   fi
 }
