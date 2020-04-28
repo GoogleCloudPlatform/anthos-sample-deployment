@@ -64,6 +64,19 @@ function parse_flags() {
   fi
 }
 
+function enable_compute_api {
+  # This is needed to check on the network.
+  {
+    echo "Enabling Compute Engine API...this may take a few moments."
+    result=$(gcloud services enable compute.googleapis.com)
+  } || {
+    echo
+    echo "FATAL: Please enable Compute API to complete the prerequisites checks.  https://console.cloud.google.com/apis/library/compute.googleapis.com?project=$PROJECT_ID "
+    echo
+    exit 1
+  }
+}
+
 function check_iam_policy {
   # iam.serviceAccounts.create and iam.serviceAccounts.setIamPolicy are the
   # 2 permissions that need to be in place.  Sufficient to check them by
@@ -150,5 +163,6 @@ check_iam_policy
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
+enable_compute_api
 check_network_is_valid
 check_internet_gateway_exists
