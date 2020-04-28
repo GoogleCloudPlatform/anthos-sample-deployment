@@ -6,7 +6,7 @@
 # Example usage:
 # ./asd-prereq-checker.sh --network foo_network
 
-NETWORK=""
+NETWORK="${2:-default}"
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 
 PROJECT_ID=$(gcloud config get-value project)
@@ -46,7 +46,6 @@ function parse_flags() {
   while test $# -gt 0; do
     case "$1" in
       -n|--network)
-        NETWORK="$2"
         shift
         shift
         ;;
