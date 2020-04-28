@@ -67,7 +67,7 @@ function parse_flags() {
 function enable_compute_api {
   # This is needed to check on the network.
   {
-    echo "Enabling Compute Engine API...this may take a few moments."
+    echo "Enabling Compute Engine API...this may take a few minutes."
     result=$(gcloud services enable compute.googleapis.com)
   } || {
     echo
