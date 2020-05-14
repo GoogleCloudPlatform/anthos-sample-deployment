@@ -17,12 +17,12 @@ DISABLED_SERVICE_MANAGEMENT_API="{
 }"
 
 INVALID_ORG_POLICY_OSLOGIN="{
-  'KnownIssueId': 'invalid_org_policy',
+  'KnownIssueId': 'invalid_org_policy_requireOsLogin',
   'Message': 'An org policy (constraints/compute.requireOsLogin) exists that will prevent this deployment.  Please try this deployment in a project without this org policy.'
 }"
 
 INVALID_ORG_POLICY_IPFORWARD="{
-  'KnownIssueId': 'invalid_org_policy',
+  'KnownIssueId': 'invalid_org_policy_vmCanIpForward)',
   'Message': 'An org policy (constraints/compute.vmCanIpForward) exists that will prevent this deployment.  Please try this deployment in a project without this org policy.'
 }"
 
