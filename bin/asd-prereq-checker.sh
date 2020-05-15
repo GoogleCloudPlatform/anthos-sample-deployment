@@ -16,6 +16,16 @@ DISABLED_SERVICE_MANAGEMENT_API="{
   'Message': 'Service Management API is not enabled. You must enable this API in the current project. https://console.cloud.google.com/apis/api/servicemanagement.googleapis.com/overview?project=$PROJECT_ID '
 }"
 
+INVALID_ORG_POLICY_OSLOGIN="{
+  'KnownIssueId': 'invalid_org_policy_requireOsLogin',
+  'Message': 'An org policy (constraints/compute.requireOsLogin) exists that will prevent this deployment.  Please try this deployment in a project without this org policy.'
+}"
+
+INVALID_ORG_POLICY_IPFORWARD="{
+  'KnownIssueId': 'invalid_org_policy_vmCanIpForward)',
+  'Message': 'An org policy (constraints/compute.vmCanIpForward) exists that will prevent this deployment.  Please try this deployment in a project without this org policy.'
+}"
+
 DEPLOYMENT_ALREADY_EXISTS="{
   'KnownIssueId': 'deployment_already_exists',
   'Message': 'An instance of Anthos Sample Deployment already exists. You must delete the previous deployment before performing another deployment.  https://console.cloud.google.com/dm/deployments?project=$PROJECT_ID '
@@ -91,6 +101,26 @@ function check_iam_policy {
   fi
 }
 
+function check_org_policy_is_valid {
+  result=$(gcloud beta resource-manager org-policies describe compute.requireOsLogin --project=$PROJECT_ID --effective)
+  if [[ "$result" == *"enforced: true"* ]]; then
+    echo
+    echo $INVALID_ORG_POLICY_OSLOGIN
+    echo
+    exit 1
+  fi
+
+  result=$(gcloud beta resource-manager org-policies describe compute.vmCanIpForward --project=$PROJECT_ID --effective)
+  if [[ "$result" == *"DENY"* ]]; then
+    echo
+    echo $INVALID_ORG_POLICY_IPFORWARD
+    echo
+    exit 1
+  fi
+
+  echo "PASS: Org Policy will allow this deployment."
+}
+
 function check_service_management_api_is_enabled {
   # Getting json output removes an output of `Listed 0 items` that
   # goes to the terminal.
@@ -159,6 +189,7 @@ function check_internet_gateway_exists {
 
 parse_flags "$@"
 check_iam_policy
+check_org_policy_is_valid
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
