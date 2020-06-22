@@ -4,9 +4,8 @@
 # the Anthos Sample Deployment is successfully deployed.
 #
 # Example usage:
-# ./asd-prereq-checker.sh --network foo_network
+# ./asd-prereq-checker.sh
 
-NETWORK="${2:-default}"
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 
 PROJECT_ID=$(gcloud config get-value project)
@@ -35,43 +34,6 @@ INVALID_PROJECT_ID="{
   'KnownIssueId': 'invalid_project_id',
   'Message': 'There is a colon in the project id. Please try this deployment in a project without a colon in the project id.'
 }"
-
-INVALID_NETWORK_LEGACY="{
-  'KnownIssueId': 'invalid_network_legacy',
-  'Message': 'Legacy network is found.  Please try this deployment in a non-legacy network.  https://console.cloud.google.com/networking/networks/list?project=$PROJECT_ID '
-}"
-
-INVALID_NETWORK_NOT_FOUND="{
-  'KnownIssueId': 'invalid_network_not_found',
-  'Message': 'Specified network is not found.  Please double-check and try again. '
-}"
-
-INVALID_GATEWAY="{
-  'KnownIssueId': 'invalid_gateway',
-  'Message': 'No internet gateway is found for this network. Please add a 0.0.0.0/0 route to the internet.  https://console.cloud.google.com/networking/routes/list?project=$PROJECT_ID '
-}"
-
-
-function parse_flags() {
-  while test $# -gt 0; do
-    case "$1" in
-      -n|--network)
-        shift
-        shift
-        ;;
-      *)
-        shift  # Remove generic argument from processing
-        ;;
-    esac
-  done
-
-  if [[ -z "$NETWORK" ]]; then
-    echo
-    echo "Please use the --network flag to specify the network that Anthos Sample Deployment will use."
-    echo
-    exit 1
-  fi
-}
 
 function enable_compute_api {
   # This is needed to check on the network.
@@ -158,41 +120,9 @@ function check_project_id_is_valid {
   fi
 }
 
-function check_network_is_valid {
-  result=$(gcloud compute networks list --format=json --filter=name:$NETWORK)
-  if [[ "$result" == "[]" ]]; then
-    echo
-    echo $INVALID_NETWORK_NOT_FOUND
-    echo
-    exit 1
-  elif [[ "$result" == *"legacy"* ]]; then
-    echo
-    echo $INVALID_NETWORK_LEGACY
-    echo
-    exit 1
-  else
-    echo "PASS: Network is valid."
-  fi
-}
-
-function check_internet_gateway_exists {
-  result=$(gcloud compute routes list --format=json --filter=network:$NETWORK)
-  if [[ "$result" != *"0.0.0.0/0"* ]]; then
-    echo
-    echo $INVALID_GATEWAY
-    echo
-    exit 1
-  else
-    echo "PASS: Internet gateway exists."
-  fi
-}
-
-parse_flags "$@"
 check_iam_policy
 check_org_policy_is_valid
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
 enable_compute_api
-check_network_is_valid
-check_internet_gateway_exists
