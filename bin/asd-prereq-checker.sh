@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -eu
-
 # This script checks that prerequisites exist to ensure that
 # the Anthos Sample Deployment is successfully deployed.
 #
@@ -27,7 +25,7 @@ INVALID_ORG_POLICY_IPFORWARD="{
 }"
 
 INVALID_ORG_POLICY_TRUSTED_IMAGES="{
-  'KnownIssueId': 'invalid_org_policy_vmCanIpForward)',
+  'KnownIssueId': 'invalid_org_policy_trustedImageProjects)',
   'Message': 'An org policy (constraints/compute.trustedImageProjects) exists that will prevent this deployment.  Please try this deployment in a project without this org policy.'
 }"
 
@@ -57,6 +55,11 @@ function check_iam_policy {
 }
 
 function check_org_policy_is_valid {
+  if ! gcloud beta resource-manager org-policies list --project=$PROJECT_ID; then
+    echo "WARNING: Unable to verify if the project has any Organization Policies that will prevent the deployment."
+    return
+  fi
+
   result=$(gcloud beta resource-manager org-policies describe compute.requireOsLogin --project=$PROJECT_ID --effective)
   if [[ "$result" == *"enforced: true"* ]]; then
     echo
