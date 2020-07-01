@@ -55,7 +55,7 @@ function check_iam_policy {
 }
 
 function check_org_policy_is_valid {
-  if ! gcloud beta resource-manager org-policies list --project=$PROJECT_ID; then
+  if ! gcloud beta resource-manager org-policies list --project=$PROJECT_ID >/dev/null 2>&1; then
     echo "WARNING: Unable to verify if the project has any Organization Policies that will prevent the deployment."
     return
   fi
