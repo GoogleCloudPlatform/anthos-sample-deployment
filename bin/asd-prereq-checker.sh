@@ -110,14 +110,6 @@ function check_deployment_does_not_exist {
     exit 1
   fi
 
-  result=$(gcloud container clusters list --format=json --filter=name:anthos-sample-cluster2)
-  if [[ "$result" == *"anthos-sample-cluster"* ]]; then
-    echo
-    echo $DEPLOYMENT_ALREADY_EXISTS
-    echo
-    exit 1
-  fi
-
   echo "PASS: Anthos Sample Deployment does not already exist."
 }
 
