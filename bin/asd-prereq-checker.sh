@@ -147,15 +147,13 @@ function check_project_id_is_valid {
 }
 
 function check_quota_is_sufficient {
-  if gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,' > /dev/null; then
-    quota=$(gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
-    limit=$(echo $quota | awk -F, '{print $2}')
-    usage=$(echo $quota | awk -F, '{print $3}')
-    remain=$(awk "BEGIN {print $limit - $usage}")
-    if [ $remain -lt 7 ]; then
-      echo $INSUFFICIENT_REGIONAL_CPUS_QUOTA
-      exit 1
-    fi
+  quota=$(gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
+  limit=$(echo $quota | awk -F, '{print $2}')
+  usage=$(echo $quota | awk -F, '{print $3}')
+  remain=$(awk "BEGIN {print $limit - $usage}")
+  if [ $remain -lt 7 ]; then
+    echo $INSUFFICIENT_REGIONAL_CPUS_QUOTA
+    exit 1
   fi
 
   if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS_ALL_REGIONS' > /dev/null; then
@@ -169,26 +167,22 @@ function check_quota_is_sufficient {
     fi
   fi
 
-  if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,' > /dev/null; then
-    quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,')
-    limit=$(echo $quota | awk -F, '{print $2}')
-    usage=$(echo $quota | awk -F, '{print $3}')
-    remain=$(awk "BEGIN {print $limit - $usage}")
-    if [ $remain -lt 1 ]; then
-      echo $INSUFFICIENT_NETWORKS_QUOTA
-      exit 1
-    fi
+  quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,')
+  limit=$(echo $quota | awk -F, '{print $2}')
+  usage=$(echo $quota | awk -F, '{print $3}')
+  remain=$(awk "BEGIN {print $limit - $usage}")
+  if [ $remain -lt 1 ]; then
+    echo $INSUFFICIENT_NETWORKS_QUOTA
+    exit 1
   fi
 
-  if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS,' > /dev/null; then
-    quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS')
-    limit=$(echo $quota | awk -F, '{print $2}')
-    usage=$(echo $quota | awk -F, '{print $3}')
-    remain=$(awk "BEGIN {print $limit - $usage}")
-    if [ $remain -lt 2 ]; then
-      echo $INSUFFICIENT_FIREWALLS_QUOTA
-      exit 1
-    fi
+  quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS')
+  limit=$(echo $quota | awk -F, '{print $2}')
+  usage=$(echo $quota | awk -F, '{print $3}')
+  remain=$(awk "BEGIN {print $limit - $usage}")
+  if [ $remain -lt 2 ]; then
+    echo $INSUFFICIENT_FIREWALLS_QUOTA
+    exit 1
   fi
 
   echo "PASS: Project has sufficient quota to support this deployment."
