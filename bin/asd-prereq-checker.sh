@@ -7,7 +7,9 @@
 # ./asd-prereq-checker.sh
 
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
-PROJECT_ID=$(gcloud config get-value project)
+PROJECT_ID=$(gcloud config get-value project 2> /dev/null)
+ZONE=$(gcloud config get-value compute/zone 2> /dev/null)
+REGION=$(echo $ZONE | awk -F- '{print $1 "-" $2}')
 
 DISABLED_SERVICE_MANAGEMENT_API="{
   'KnownIssueId': 'disabled_service_management_api',
@@ -37,6 +39,26 @@ DEPLOYMENT_ALREADY_EXISTS="{
 INVALID_PROJECT_ID="{
   'KnownIssueId': 'invalid_project_id',
   'Message': 'There is a colon in the project id. Please try this deployment in a project without a colon in the project id.'
+}"
+
+INSUFFICIENT_REGIONAL_CPUS_QUOTA="{
+  'KnownIssueId': 'insufficient_regional_cpus_quota',
+  'Message': 'Insufficient regional CPUS quota for 7 more vCPUs in the project.'
+}"
+
+INSUFFICIENT_GLOBAL_CPUS_QUOTA="{
+  'KnownIssueId': 'insufficient_global_cpus_quota',
+  'Message': 'Insufficient CPUS_ALL_REGIONS quota for 7 more vCPUs in the project.'
+}"
+
+INSUFFICIENT_NETWORKS_QUOTA="{
+  'KnownIssueId': 'insufficient_networks_quota',
+  'Message': 'Insufficient NETWORKS quota for 1 more network in the project.'
+}"
+
+INSUFFICIENT_FIREWALLS_QUOTA="{
+  'KnownIssueId': 'insufficient_firewalls_quota',
+  'Message': 'Insufficient FIREWALLS quota for 2 more firewalls in the project.'
 }"
 
 function check_iam_policy {
@@ -124,8 +146,73 @@ function check_project_id_is_valid {
   fi
 }
 
+function check_quota_is_sufficient {
+  if gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,' > /dev/null; then
+    quota=$(gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
+    limit=$(echo $quota | awk -F, '{print $2}')
+    usage=$(echo $quota | awk -F, '{print $3}')
+    remain=$(awk "BEGIN {print $limit - $usage}")
+    if [ $remain -lt 7 ]; then
+      echo $INSUFFICIENT_REGIONAL_CPUS_QUOTA
+      exit 1
+    fi
+  fi
+
+  if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS_ALL_REGIONS' > /dev/null; then
+    quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS_ALL_REGIONS,')
+    limit=$(echo $quota | awk -F, '{print $2}')
+    usage=$(echo $quota | awk -F, '{print $3}')
+    remain=$(awk "BEGIN {print $limit - $usage}")
+    if [ $remain -lt 7 ]; then
+      echo $INSUFFICIENT_GLOBAL_CPUS_QUOTA
+      exit 1
+    fi
+  fi
+
+  if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,' > /dev/null; then
+    quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,')
+    limit=$(echo $quota | awk -F, '{print $2}')
+    usage=$(echo $quota | awk -F, '{print $3}')
+    remain=$(awk "BEGIN {print $limit - $usage}")
+    if [ $remain -lt 1 ]; then
+      echo $INSUFFICIENT_NETWORKS_QUOTA
+      exit 1
+    fi
+  fi
+
+  if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS,' > /dev/null; then
+    quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS')
+    limit=$(echo $quota | awk -F, '{print $2}')
+    usage=$(echo $quota | awk -F, '{print $3}')
+    remain=$(awk "BEGIN {print $limit - $usage}")
+    if [ $remain -lt 2 ]; then
+      echo $INSUFFICIENT_FIREWALLS_QUOTA
+      exit 1
+    fi
+  fi
+
+  echo "PASS: Project has sufficient quota to support this deployment."
+}
+
+function usage {
+  if [[ -z "${PROJECT_ID}" ]]; then
+    echo "ERRPR: Project ID must be set: gcloud config set project [PROJECT_ID]"
+  fi
+  if [[ -z "${ZONE}" ]]; then
+    echo "ERROR: Deployment zone must be set: gcloud config set compute/zone [ZONE]"
+  fi
+  echo "Then rerun ${0##*/}"
+  exit 1
+}
+
+if [[ -z "${PROJECT_ID}" || -z "${ZONE}" ]]; then
+  usage >&2
+fi
+
+echo "Checking project ${PROJECT_ID}, region ${REGION}, zone ${ZONE}"
 check_iam_policy
 check_org_policy_is_valid
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
+check_quota_is_sufficient
