@@ -148,39 +148,39 @@ function check_project_id_is_valid {
 
 function check_quota_is_sufficient {
   quota=$(gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
-  limit=$(echo $quota | awk -F, '{print $2}')
-  usage=$(echo $quota | awk -F, '{print $3}')
-  remain=$(awk "BEGIN {print $limit - $usage}")
-  if [ $remain -lt 7 ]; then
+  limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
+  usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
+  remain=$(( limit - usage ))
+  if (( remain < 7 )); then
     echo $INSUFFICIENT_REGIONAL_CPUS_QUOTA
     exit 1
   fi
 
   if gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS_ALL_REGIONS' > /dev/null; then
     quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS_ALL_REGIONS,')
-    limit=$(echo $quota | awk -F, '{print $2}')
-    usage=$(echo $quota | awk -F, '{print $3}')
-    remain=$(awk "BEGIN {print $limit - $usage}")
-    if [ $remain -lt 7 ]; then
+    limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
+    usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
+    remain=$(( limit - usage ))
+    if (( remain < 7 )); then
       echo $INSUFFICIENT_GLOBAL_CPUS_QUOTA
       exit 1
     fi
   fi
 
   quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^NETWORKS,')
-  limit=$(echo $quota | awk -F, '{print $2}')
-  usage=$(echo $quota | awk -F, '{print $3}')
-  remain=$(awk "BEGIN {print $limit - $usage}")
-  if [ $remain -lt 1 ]; then
+  limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
+  usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
+  remain=$(( limit - usage ))
+  if (( remain < 1 )); then
     echo $INSUFFICIENT_NETWORKS_QUOTA
     exit 1
   fi
 
   quota=$(gcloud compute project-info describe --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^FIREWALLS')
-  limit=$(echo $quota | awk -F, '{print $2}')
-  usage=$(echo $quota | awk -F, '{print $3}')
-  remain=$(awk "BEGIN {print $limit - $usage}")
-  if [ $remain -lt 2 ]; then
+  limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
+  usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
+  remain=$(( limit - usage ))
+  if (( remain < 2 )); then
     echo $INSUFFICIENT_FIREWALLS_QUOTA
     exit 1
   fi
