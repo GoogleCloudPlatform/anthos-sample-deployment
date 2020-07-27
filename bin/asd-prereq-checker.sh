@@ -9,7 +9,10 @@
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
 PROJECT_ID=$(gcloud config get-value project 2> /dev/null)
 ZONE=$(gcloud config get-value compute/zone 2> /dev/null)
-REGION=$(echo $ZONE | awk -F- '{print $1 "-" $2}')
+if [[ -z "${ZONE}" ]]; then
+  ZONE='us-central1-c'
+fi
+REGION=$(echo ${ZONE} | awk -F- '{print $1 "-" $2}')
 
 DISABLED_SERVICE_MANAGEMENT_API="{
   'KnownIssueId': 'disabled_service_management_api',
@@ -147,7 +150,7 @@ function check_project_id_is_valid {
 }
 
 function check_quota_is_sufficient {
-  quota=$(gcloud compute regions describe $REGION --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
+  quota=$(gcloud compute regions describe ${REGION} --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
   limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
   usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
   remain=$(( limit - usage ))
@@ -189,21 +192,18 @@ function check_quota_is_sufficient {
 }
 
 function usage {
-  if [[ -z "${PROJECT_ID}" ]]; then
-    echo "ERRPR: Project ID must be set: gcloud config set project [PROJECT_ID]"
-  fi
-  if [[ -z "${ZONE}" ]]; then
-    echo "ERROR: Deployment zone must be set: gcloud config set compute/zone [ZONE]"
-  fi
+  echo "Project ID must be set: gcloud config set project [PROJECT_ID]"
+  echo "Optionally, set deployment zone: gcloud config set compute/zone [ZONE]"
   echo "Then rerun ${0##*/}"
   exit 1
 }
 
-if [[ -z "${PROJECT_ID}" || -z "${ZONE}" ]]; then
+if [[ -z "${PROJECT_ID}" ]]; then
   usage >&2
 fi
 
 echo "Checking project ${PROJECT_ID}, region ${REGION}, zone ${ZONE}"
+echo
 check_iam_policy
 check_org_policy_is_valid
 check_service_management_api_is_enabled
