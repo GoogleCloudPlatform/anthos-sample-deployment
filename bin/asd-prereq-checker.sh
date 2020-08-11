@@ -46,7 +46,7 @@ INVALID_PROJECT_ID_COLON="{
 
 INVALID_PROJECT_ID_QWIKLABS="{
   'KnownIssueId': 'invalid_project_id_qwiklabs',
-  'Message': 'Qwiklabs project detected. Anthos Sample Deployment is not designed to run on Qwiklabs environment. Please do not use resources that are not specified in lab instructions, see https://support.google.com/qwiklabs/answer/9158081?#max-resources-ql-lab for more details.'
+  'Message': 'A Qwiklabs project is detected. Anthos Sample Deployment is not designed to run on Qwiklabs environment.'
 }"
 
 INSUFFICIENT_REGIONAL_CPUS_QUOTA="{
