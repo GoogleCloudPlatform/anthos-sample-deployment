@@ -44,6 +44,11 @@ INVALID_PROJECT_ID="{
   'Message': 'There is a colon in the project id. Please try this deployment in a project without a colon in the project id.'
 }"
 
+INVALID_PROJECT_ENV="{
+  'KnownIssueId': 'invalid_project_env',
+  'Message': 'Qwiklabs project detected. Anthos Sample Deployment is not designed to run on Qwiklabs environment. Please do not use resources that are not specified in lab instructions, see https://support.google.com/qwiklabs/answer/9158081?#max-resources-ql-lab for more details.'
+}"
+
 INSUFFICIENT_REGIONAL_CPUS_QUOTA="{
   'KnownIssueId': 'insufficient_regional_cpus_quota',
   'Message': 'Insufficient regional CPUS quota for 7 more vCPUs in the project.'
@@ -149,6 +154,19 @@ function check_project_id_is_valid {
   fi
 }
 
+function check_project_env_is_valid {
+  if [[ "$PROJECT_ID" == "qwiklabs-gcp-"* ]]; then
+    project_parent=$(gcloud projects describe $PROJECT_ID --format="value(parent.id)")
+    if [[ "$project_parent" == "158770657771" ]]; then
+      echo
+      echo $INVALID_PROJECT_ENV
+      echo
+      exit 1
+    fi
+  fi
+  echo "PASS: Project environment is valid."
+}
+
 function check_quota_is_sufficient {
   quota=$(gcloud compute regions describe ${REGION} --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
   limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
@@ -209,4 +227,5 @@ check_org_policy_is_valid
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
+check_project_env_is_valid
 check_quota_is_sufficient
