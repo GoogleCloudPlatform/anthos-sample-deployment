@@ -39,13 +39,13 @@ DEPLOYMENT_ALREADY_EXISTS="{
   'Message': 'An instance of Anthos Sample Deployment already exists. You must delete the previous deployment before performing another deployment.  https://console.cloud.google.com/dm/deployments?project=$PROJECT_ID '
 }"
 
-INVALID_PROJECT_ID="{
-  'KnownIssueId': 'invalid_project_id',
+INVALID_PROJECT_ID_COLON="{
+  'KnownIssueId': 'invalid_project_id_colon',
   'Message': 'There is a colon in the project id. Please try this deployment in a project without a colon in the project id.'
 }"
 
-INVALID_PROJECT_ENV="{
-  'KnownIssueId': 'invalid_project_env',
+INVALID_PROJECT_ID_QWIKLABS="{
+  'KnownIssueId': 'invalid_project_id_qwiklabs',
   'Message': 'Qwiklabs project detected. Anthos Sample Deployment is not designed to run on Qwiklabs environment. Please do not use resources that are not specified in lab instructions, see https://support.google.com/qwiklabs/answer/9158081?#max-resources-ql-lab for more details.'
 }"
 
@@ -146,26 +146,18 @@ function check_deployment_does_not_exist {
 function check_project_id_is_valid {
   if [[ "$PROJECT_ID" == *":"* ]]; then
     echo
-    echo $INVALID_PROJECT_ID
+    echo $INVALID_PROJECT_ID_COLON
     echo
     exit 1
-  else
-    echo "PASS: Project ID is valid, does not contain colon."
+  elif [[ "$PROJECT_ID" =~ ^qwiklabs-gcp-.{2}-.{12}$ ]]; then
+    echo
+    echo $INVALID_PROJECT_ID_QWIKLABS
+    echo
+    exit 1
   fi
+  echo "PASS: Project ID is valid."
 }
 
-function check_project_env_is_valid {
-  if [[ "$PROJECT_ID" == "qwiklabs-gcp-"* ]]; then
-    project_parent=$(gcloud projects describe $PROJECT_ID --format="value(parent.id)")
-    if [[ "$project_parent" == "158770657771" ]]; then
-      echo
-      echo $INVALID_PROJECT_ENV
-      echo
-      exit 1
-    fi
-  fi
-  echo "PASS: Project environment is valid."
-}
 
 function check_quota_is_sufficient {
   quota=$(gcloud compute regions describe ${REGION} --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
@@ -227,5 +219,4 @@ check_org_policy_is_valid
 check_service_management_api_is_enabled
 check_deployment_does_not_exist
 check_project_id_is_valid
-check_project_env_is_valid
 check_quota_is_sufficient
