@@ -18,3 +18,8 @@ metadata:
   name: anthos-sample-cluster1
   labels:
     environment: asm
+---
+kind: Cluster
+apiVersion: clusterregistry.k8s.io/v1alpha1
+metadata:
+  name: anthos-sample-cluster2
