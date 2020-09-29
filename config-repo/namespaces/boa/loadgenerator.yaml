@@ -43,7 +43,7 @@ spec:
           value: "error"
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 512Mi
           limits:
             cpu: 500m

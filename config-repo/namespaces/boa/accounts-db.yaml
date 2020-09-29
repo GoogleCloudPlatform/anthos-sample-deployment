@@ -48,7 +48,7 @@ spec:
             name: postgredb
         resources:
           requests:
-            cpu: 100m
+            cpu: 50m
             memory: 128Mi
           limits:
             cpu: 500m
