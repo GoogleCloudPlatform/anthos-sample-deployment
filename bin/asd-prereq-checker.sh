@@ -7,6 +7,7 @@
 # ./asd-prereq-checker.sh
 
 SERVICE_MANAGEMENT_API=servicemanagement.googleapis.com
+COMPUTE_API=compute.googleapis.com
 PROJECT_ID=$(gcloud config get-value project 2> /dev/null)
 ZONE=$(gcloud config get-value compute/zone 2> /dev/null)
 if [[ -z "${ZONE}" ]]; then
@@ -160,6 +161,12 @@ function check_project_id_is_valid {
 
 
 function check_quota_is_sufficient {
+  api=$(gcloud services list --format=json --filter=name:$COMPUTE_API)
+  if [[ "$api" != *"$COMPUTE_API"* ]]; then
+    echo "WARNING: Unable to verify compute quota because $COMPUTE_API in project $PROJECT_ID is not enabled. Please run 'gcloud services enable $COMPUTE_API' before running this script again."
+    return
+  fi
+
   quota=$(gcloud compute regions describe ${REGION} --flatten quotas --format="csv(quotas.metric,quotas.limit,quotas.usage)"|egrep '^CPUS,')
   limit=$(echo $quota | awk -F, '{print $2}' | awk -F. '{print $1}' )
   usage=$(echo $quota | awk -F, '{print $3}' | awk -F. '{print $1}' )
