@@ -163,7 +163,7 @@ function check_project_id_is_valid {
 function check_quota_is_sufficient {
   api=$(gcloud services list --format=json --filter=name:$COMPUTE_API)
   if [[ "$api" != *"$COMPUTE_API"* ]]; then
-    echo "WARNING: Unable to verify compute quota because $COMPUTE_API in project $PROJECT_ID is not enabled. Enable this API in the current project at https://console.cloud.google.com/apis/api/compute.googleapis.com/overview?project=$PROJECT_ID, and run this script again."
+    echo "WARNING: Unable to verify compute quota because $COMPUTE_API in project $PROJECT_ID is not enabled. Enable this API in the current project at https://console.cloud.google.com/apis/api/compute.googleapis.com/overview?project=$PROJECT_ID and run this script again."
     return
   fi
 
