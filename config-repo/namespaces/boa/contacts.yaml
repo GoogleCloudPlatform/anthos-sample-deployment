@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ spec:
         - name: PORT
           value: "8080"
         - name: ENABLE_TRACING
-          value: "false"
+          value: "true"
         # Valid levels are debug, info, warning, error, critical.
         # If no valid level is set, will default to info.
         - name: LOG_LEVEL
